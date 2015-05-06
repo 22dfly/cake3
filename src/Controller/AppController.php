@@ -15,6 +15,8 @@
 namespace App\Controller;
 
 use Cake\Controller\Controller;
+use Cake\Event\Event;
+use Cake\Core\Configure;
 
 /**
  * Application Controller
@@ -38,6 +40,7 @@ class AppController extends Controller
     {
         parent::initialize();
         $this->loadComponent('Flash');
+        $this->loadComponent('Ga');
         $this->loadComponent('Auth', [
             'loginAction' => [
                 'controller' => 'Users',
@@ -52,6 +55,15 @@ class AppController extends Controller
                 'action' => 'login'
             ]
         ]);
+    }
+
+    public function beforeFilter(Event $event)
+    {
+        parent::beforeFilter($event);
+
+        if (preg_match("/". implode("|", Configure::read('ga_item')) . "/i", $this->request->url)) {
+            $this->Ga->track($this->request->here);
+        }
     }
 
     public function isAuthorized($user)
